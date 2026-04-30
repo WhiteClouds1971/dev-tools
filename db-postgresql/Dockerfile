@@ -1,2 +1,2 @@
-FROM postgres:17-alpine
+FROM postgres:17.9-alpine
 ENV TZ=UTC
