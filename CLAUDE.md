@@ -6,7 +6,7 @@
 
 ## 概述
 
-基于 Docker Compose 的本地开发基础设施，提供 PostgreSQL 17 和 Nacos（阿里巴巴服务发现与配置管理）。
+基于 Docker Compose 的本地开发基础设施，提供 PostgreSQL 17、MySQL 8.0 和 Nacos（阿里巴巴服务发现与配置管理）。
 
 ## 常用命令
 
@@ -16,6 +16,7 @@ docker-compose up -d
 
 # 启动单个服务
 docker-compose up -d postgres
+docker-compose up -d mysql
 docker-compose up -d nacos
 
 # 重新构建并重启服务（例如 Dockerfile 变更后）
@@ -24,6 +25,7 @@ docker-compose build nacos && docker-compose up -d nacos
 # 查看日志
 docker-compose logs -f nacos
 docker-compose logs -f postgres
+docker-compose logs -f mysql
 
 # 停止所有服务
 docker-compose down
@@ -33,6 +35,9 @@ curl -sf -o /dev/null -w "%{http_code}" http://localhost:8080/
 
 # 连接 PostgreSQL
 docker exec -it dev-postgres psql -U postgres -d dev-nacos
+
+# 连接 MySQL
+docker exec -it dev-mysql mysql -u dev -pdev dev
 ```
 
 ## 架构
@@ -57,6 +62,7 @@ Nacos 依赖 PostgreSQL 健康检查通过后才会启动（`depends_on` + `cond
 | 服务       | 端口 | 用途                |
 | ---------- | ---- | ------------------- |
 | PostgreSQL | 5432 | 数据库              |
+| MySQL      | 3306 | 数据库              |
 | Nacos      | 8848 | API 服务端          |
 | Nacos      | 8080 | 管理控制台 Web UI   |
 | Nacos      | 9848 | gRPC 客户端         |
@@ -67,6 +73,7 @@ Nacos 依赖 PostgreSQL 健康检查通过后才会启动（`depends_on` + `cond
 所有数据卷映射到宿主机的 `/Users/cloudswhite/Personal/SoftwareData/docker/`：
 
 - PostgreSQL 数据：`.../postgresql`
+- MySQL 数据：`.../mysql`
 - Nacos 数据：`.../nacos/data`
 - Nacos 日志：`.../nacos/logs`
 
@@ -76,4 +83,4 @@ Nacos 已开启认证（`NACOS_AUTH_ENABLE=true`）。默认凭据：`nacos` / `
 
 ### .env 文件
 
-包含 PostgreSQL 凭据（`POSTGRES_USER`、`POSTGRES_PASSWORD`、`POSTGRES_DB`）。`.gitignore` 已排除 `.env`，当前值为默认值（`postgres`/`postgres`/`postgres`）。
+包含 PostgreSQL 凭据（`POSTGRES_USER`、`POSTGRES_PASSWORD`、`POSTGRES_DB`）和 MySQL 凭据（`MYSQL_ROOT_PASSWORD`、`MYSQL_DATABASE`、`MYSQL_USER`、`MYSQL_PASSWORD`）。`.gitignore` 已排除 `.env`，当前值均为开发默认值（`postgres`/`postgres`/`postgres` 和 `root`/`dev`/`dev`/`dev`）。
